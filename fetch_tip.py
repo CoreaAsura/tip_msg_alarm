@@ -30,20 +30,25 @@ def fetch_tip():
     session.post(LOGIN_URL, data={"identity": SPACE_TRACK_USER, "password": SPACE_TRACK_PASS})
     resp = session.get(TIP_URL)
     df = pd.read_csv(StringIO(resp.text))
+
     os.makedirs("data", exist_ok=True)
     today = datetime.datetime.utcnow().strftime("%Y%m%d")
     df.to_csv(f"data/tip_{today}.csv", index=False)
-    df.to_csv("data/tip_latest.csv", index=False)
     df.to_string("data/tip_latest.txt")
 
-    # 새로운 메시지 비교
-    if os.path.exists("data/tip_latest.csv"):
-        old_df = pd.read_csv("data/tip_latest.csv")
-        new_df = df.merge(old_df, how="outer", indicator=True)
-        new_df = new_df[new_df["_merge"] == "left_only"].drop(columns=["_merge"])
+    # 이전 데이터 불러오기
+    old_path = "data/tip_latest.csv"
+    old_df = pd.read_csv(old_path) if os.path.exists(old_path) else None
+
+    # 비교 후 알림
+    if old_df is not None:
+        new_df = pd.concat([df, old_df]).drop_duplicates(keep=False)
         if not new_df.empty:
             new_df.to_csv("data/tip_new.csv", index=False)
             send_email(new_df)
+
+    # 최신 데이터 덮어쓰기
+    df.to_csv(old_path, index=False)
 
 if __name__ == "__main__":
     fetch_tip()
