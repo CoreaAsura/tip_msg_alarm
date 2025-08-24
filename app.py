@@ -2,22 +2,25 @@ import streamlit as st
 import pandas as pd
 import os
 
-st.set_page_config(page_title="TIP MSG 모니터링", layout="wide")
-st.title("🛰️ 위성 추락 경보 모니터링 (TIP MSG)")
+st.set_page_config(page_title="TIP MSG Viewer", layout="wide")
+st.title("🌍 위성 추락 경보 (TIP MSG) 실시간 뷰어")
 
-DATA_FILE = "data/tip_latest.csv"
-TXT_FILE  = "data/tip_latest.txt"
+latest_path = "data/tip_latest.csv"
+new_path = "data/tip_new.csv"
 
-if st.button("📡 즉시 TIP 확인"):
-    os.system("python fetch_tip.py")
-
-if os.path.exists(DATA_FILE):
-    df = pd.read_csv(DATA_FILE)
-    st.success(f"최신 TIP 메시지 {len(df)}건을 불러왔습니다.")
-    st.dataframe(df)
-    st.download_button("📄 CSV 다운로드", df.to_csv(index=False).encode("utf-8"), "tip_latest.csv", "text/csv")
-    with open(TXT_FILE, "r", encoding="utf-8") as f:
-        txt_data = f.read()
-    st.download_button("📄 TXT 다운로드", txt_data.encode("utf-8"), "tip_latest.txt", "text/plain")
+if os.path.exists(latest_path):
+    df = pd.read_csv(latest_path)
+    st.subheader("📌 최신 TIP MSG")
+    st.dataframe(df, use_container_width=True)
 else:
-    st.warning("아직 TIP MSG 데이터가 없습니다. 자동 수집 대기 중입니다.")
+    st.warning("아직 TIP MSG 데이터가 없습니다. 먼저 fetch_tip.py를 실행해주세요.")
+
+if os.path.exists(new_path):
+    new_df = pd.read_csv(new_path)
+    if not new_df.empty:
+        st.subheader("🚨 신규 TIP MSG 감지됨!")
+        st.dataframe(new_df, use_container_width=True)
+    else:
+        st.info("신규 TIP MSG는 없습니다.")
+else:
+    st.info("아직 신규 TIP MSG 데이터가 없습니다.")
