@@ -2,14 +2,15 @@ name: Fetch TIP Messages
 
 on:
   schedule:
-    - cron: "30 23 * * *"  # 매일 KST 08:30
+    - cron: "30 23 * * *"  # 매일 UTC 23:30 → 한국시간 08:30
   workflow_dispatch:
 
 jobs:
   fetch-tip:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -18,7 +19,8 @@ jobs:
           python-version: "3.10"
 
       - name: Install dependencies
-        run: pip install pandas requests
+        run: |
+          pip install pandas requests
 
       - name: Run fetch_tip.py
         env:
@@ -27,12 +29,6 @@ jobs:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
-        run: python fetch_tip.py
-
-      - name: Commit and push results
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add data/
-          git commit -m "Update TIP messages"
-          git push
+          echo "📡 TIP 메시지 수집 시작"
+          python fetch_tip.py
