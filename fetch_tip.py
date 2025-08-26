@@ -69,6 +69,9 @@ def fetch_tip():
         new_df = pd.concat([df, old_df]).drop_duplicates(keep=False)
         if not new_df.empty:
             new_df.to_csv("data/tip_new.csv", index=False)
+            # TXT 저장 추가
+            with open("data/tip_new.txt", "w", encoding="utf-8") as f:
+                f.write(new_df.to_string(index=False))
             send_email(new_df)
         else:
             logging.info("📭 신규 TIP 메시지 없음")
