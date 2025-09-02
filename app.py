@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 st.set_page_config(page_title="TIP MSG Viewer", layout="wide")
-st.title("🌍 위성 추락 경보 (TIP MSG) 실시간 뷰어")
+st.title("위성추락경보 for MSSB")
 
 latest_path = "data/tip_latest.csv"
 new_csv_path = "data/tip_new.csv"
@@ -46,3 +46,4 @@ if os.path.exists(new_csv_path):
         st.info("✅ 현재 신규 TIP MSG는 없습니다.")
 else:
     st.info("아직 신규 TIP MSG 데이터가 없습니다.")
+
