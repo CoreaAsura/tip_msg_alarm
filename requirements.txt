@@ -1,4 +1,5 @@
 streamlit
-skyfield
 pandas
+requests
 pytz
+schedule
