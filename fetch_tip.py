@@ -1,12 +1,8 @@
 import requests
-import pandas as pd
-from datetime import datetime, timedelta
-import os
 
 def fetch_tip_messages(email, password, save_path):
     login_url = "https://www.space-track.org/ajaxauth/login"
     query_url = "https://www.space-track.org/basicspacedata/query/class/tip/orderby/MSG_EPOCH desc/format/csv"
-
     credentials = {"identity": email, "password": password}
 
     with requests.Session() as session:
