@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import requests
 from datetime import datetime, timedelta
 import pytz
 import os
@@ -8,6 +9,30 @@ st.set_page_config(page_title="TIP MSG Viewer", layout="wide")
 st.title("위성추락경보 for MSSB")
 
 CSV_PATH = "data/tip_new.csv"
+
+# ✅ 1. Streamlit secrets에서 계정 정보 불러오기
+email = st.secrets["SPACETRACK_EMAIL"]
+password = st.secrets["SPACETRACK_PASSWORD"]
+
+# ✅ 2. SPACE-TRACK에서 TIP 메시지 다운로드
+def fetch_tip_messages(email, password, save_path):
+    login_url = "https://www.space-track.org/ajaxauth/login"
+    query_url = "https://www.space-track.org/basicspacedata/query/class/tip/orderby/MSG_EPOCH desc/format/csv"
+    credentials = {"identity": email, "password": password}
+
+    with requests.Session() as session:
+        session.post(login_url, data=credentials)
+        response = session.get(query_url)
+        if response.status_code == 200:
+            with open(save_path, "w", encoding="utf-8") as f:
+                f.write(response.text)
+        else:
+            st.error("❌ TIP 메시지 다운로드 실패")
+
+# ✅ 3. 데이터 다운로드 및 로딩
+if not os.path.exists(CSV_PATH):
+    os.makedirs("data", exist_ok=True)
+    fetch_tip_messages(email, password, CSV_PATH)
 
 if os.path.exists(CSV_PATH):
     df = pd.read_csv(CSV_PATH)
