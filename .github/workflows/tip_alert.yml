@@ -18,7 +18,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install pandas requests
 
       - name: Run TIP alert
         env:
@@ -27,17 +27,4 @@ jobs:
           SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           ALERT_RECIPIENT: ${{ secrets.ALERT_RECIPIENT }}
-        run: |
-          python -c "
-          from fetch_tip import fetch_tip_messages
-          from email_alert import send_email_alert
-          import pandas as pd
-          from datetime import datetime, timedelta
-
-          fetch_tip_messages('${{ secrets.SPACETRACK_EMAIL }}', '${{ secrets.SPACETRACK_PASSWORD }}', 'data/tip_new.csv')
-          df = pd.read_csv('data/tip_new.csv')
-          df['MSG_EPOCH'] = pd.to_datetime(df['MSG_EPOCH'], errors='coerce', utc=True)
-          recent = df[df['MSG_EPOCH'] >= datetime.utcnow() - timedelta(hours=2)]
-          if not recent.empty:
-              send_email_alert('${{ secrets.SMTP_EMAIL }}', '${{ secrets.SMTP_PASSWORD }}', '${{ secrets.ALERT_RECIPIENT }}', len(recent), 'https://your-streamlit-app-url/data/tip_new.csv')
-          "
+        run: python run_tip_alert.py
